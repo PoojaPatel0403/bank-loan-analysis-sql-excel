@@ -1,9 +1,10 @@
 -- ----------------------------------------------
--- Data Exploration and Cleaning
+-- Data Exploration and Cleaning (Optional)
 -- ----------------------------------------------
 
 -- 1. Check for Missing Values in Important Columns
 -- Checking if any critical columns like 'loan_amount', 'issue_date', or 'int_rate' have NULL values
+
 SELECT COUNT(*) AS Missing_Values
 FROM Bank_Loan_Data
 WHERE loan_amount IS NULL OR issue_date IS NULL OR int_rate IS NULL;
@@ -87,17 +88,53 @@ SELECT CONCAT(ROUND(AVG(int_rate) * 100, 2), ' %') AS MTD_Avg_Interest_Rate
 FROM Bank_Loan_Data
 WHERE MONTH(issue_date) = 12 AND YEAR(issue_date) = 2021;
 
+-- ----------------------------------------------
+--DASHBOARD - 1(Summary)
+-- ----------------------------------------------
+
+--Good Loan Measures
+-- ---------------------------------------------- 
+
 -- Good Loan Percentage (Fully Paid or Current)
 SELECT CONCAT(ROUND(
     (COUNT(CASE WHEN loan_status = 'Fully Paid' OR loan_status = 'Current' THEN id END) * 100) 
     / COUNT(id), 2), ' %') AS Good_Loan 
 FROM Bank_Loan_Data;
 
--- Bad Loan Percentage (Charged Off)
+--Good Loan Application
+SELECT COUNT(id) as Good_Loan_Applications FROM Bank_Loan_Data
+WHERE loan_status = 'Fully Paid' OR loan_status = 'Current'
+
+--Good Loan Funded Amount
+SELECT SUM(loan_amount) as Good_Loan_Funded_Amount FROM Bank_Loan_Data
+WHERE loan_status = 'Fully Paid' OR loan_status = 'Current'
+
+--Good Loan Amount Recieved 
+SELECT SUM(total_payment) as Good_Loan_Amount_recieved FROM Bank_Loan_Data
+WHERE loan_status = 'Fully Paid' OR loan_status = 'Current'
+
+
+--Bad Loan Measures
+-- ----------------------------------------------
+
+--Bad Loan Percentage (Charged Off)
 SELECT CONCAT(ROUND(
     (COUNT(CASE WHEN loan_status = 'Charged Off' THEN id END) * 100) 
     / COUNT(id), 2), ' %') AS Bad_Loan 
 FROM Bank_Loan_Data;
+
+--Bad Loan Application
+SELECT COUNT(id) as Bad_Loan_Applications FROM Bank_Loan_Data
+WHERE loan_status = 'Charged Off'
+
+--Bad Loan Funded Amount
+SELECT SUM(loan_amount) as Bad_Loan_Funded_Amount FROM Bank_Loan_Data
+WHERE loan_status = 'Charged Off'
+
+--Bad Loan Amount Recieved 
+SELECT SUM(total_payment) as Bad_Loan_Amount_recieved FROM Bank_Loan_Data
+WHERE loan_status = 'Charged Off'
+
 
 -- Loan Status-1: Breakdown by loan status (applications, funded amount, received amount, interest rate, and DTI)
 SELECT 
@@ -109,6 +146,19 @@ SELECT
     AVG(dti * 100) AS DTI
 FROM bank_loan_data
 GROUP BY loan_status;
+
+----Loan status-2 (MTD Measures for applications, funded amount, received amount, interest rate, and DTI)
+SELECT
+loan_status,
+SUM(total_payment) AS MTD_Total_Amount_Recived,
+SUM(loan_amount) AS MTD_Total_Funded_Amount
+FROM Bank_Loan_Data
+WHERE MONTH(issue_date)=12
+GROUP BY loan_status
+
+-- ----------------------------------------------
+--DASHBOARD -2 (Overview)
+-- ----------------------------------------------
 
 -- Monthly Trends for KPIs
 SELECT 
@@ -130,3 +180,60 @@ SELECT
 FROM bank_loan_data
 GROUP BY address_state
 ORDER BY address_state;
+
+--Loan term analysis for KPI's
+SELECT 
+    term AS Term,
+    COUNT(id) AS Total_Loan_Applications,
+    SUM(loan_amount) AS Total_Funded_Amount,
+    SUM(total_payment) AS Total_Received_Amount
+FROM 
+    bank_loan_data
+GROUP BY 
+   term
+ORDER BY 
+    term
+
+--Emp length analysis for KPI's
+SELECT 
+    emp_length AS Emp_Length,
+    COUNT(id) AS Total_Loan_Applications,
+    SUM(loan_amount) AS Total_Funded_Amount,
+    SUM(total_payment) AS Total_Received_Amount
+FROM 
+    bank_loan_data
+GROUP BY 
+   emp_length
+ORDER BY 
+    emp_length
+
+--Loan purpose analysis for KPI's
+SELECT 
+    purpose AS Loan_purpose,
+    COUNT(id) AS Total_Loan_Applications,
+    SUM(loan_amount) AS Total_Funded_Amount,
+    SUM(total_payment) AS Total_Received_Amount
+FROM 
+    bank_loan_data
+GROUP BY 
+   purpose
+ORDER BY 
+    purpose
+
+--Home ownership analysis for KPI's
+SELECT 
+    home_ownership AS Home_Ownership,
+    COUNT(id) AS Total_Loan_Applications,
+    SUM(loan_amount) AS Total_Funded_Amount,
+    SUM(total_payment) AS Total_Received_Amount
+FROM 
+    bank_loan_data
+GROUP BY 
+   home_ownership
+ORDER BY 
+    home_ownership
+
+-- ----------------------------------------------
+--DASHBOARD -3 (Details)
+-- ----------------------------------------------
+SELECT*FROM Bank_Loan_Data
