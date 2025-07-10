@@ -1,5 +1,5 @@
 -- ----------------------------------------------
--- Data Exploration and Cleaning (Optional)
+-- Data Exploration and Cleaning
 -- ----------------------------------------------
 
 -- 1. Check for Missing Values in Important Columns
